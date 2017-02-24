@@ -85,9 +85,6 @@ def sextractor(in_filename,detect_thresh,PSF_SIZE,out_cat_name=None,out_check_na
     f.close()
     filt_filename = 'gauss_2.0_5x5.conv'
 
-    opt_sext = [in_filename,'-CATALOG_TYPE','ASCII_HEAD','-CATALOG_NAME',out_cat_name+'.cat','-CHECKIMAGE_NAME',out_check_name,\
-    '-DETECT_MINAREA','4','-DETECT_THRESH',str(detect_thresh),'-FILTER','N','-FILTER_NAME',filt_filename,\
-    '-DEBLEND_MINCONT','1','-WEIGHT_TYPE','NONE','-SATUR_LEVEL','1','-GAIN','0','-PARAMETERS_NAME',param] # low snr min area = 5, high snr min area = 10
     com_sext = ['sex',in_filename,'-CATALOG_TYPE','FITS_LDAC','-CATALOG_NAME',out_cat_name+'.cat','-CHECKIMAGE_NAME',out_check_name\
                 ,'-DETECT_MINAREA','4','-DETECT_THRESH',str(detect_thresh),'-FILTER','N','-FILTER_NAME',filt_filename,\
                 '-DEBLEND_MINCONT','1','-WEIGHT_TYPE','NONE','-SATUR_LEVEL','1','-GAIN','0','-VERBOSE_TYPE','FULL','-PARAMETERS_NAME',param]
@@ -168,16 +165,6 @@ def psfextractor(PSF_SIZE,PSF_SAMPLING,cat_name,var_deg=3):
     scaley = hdu[1].header['POLSCAL2']
     deg = hdu[1].header['POLDEG1']
     hdu.close()
-
-    #os.remove(cat_name+'.psf')
-    #os.remove('proto_'+cat_name+'.fits')
-    os.remove('chi_'+cat_name+'.fits')
-    #os.remove('submoffat_'+cat_name+'.fits')
-    #os.remove('subsym_'+cat_name+'.fits')
-    os.remove('snap_'+cat_name+'.fits')
-    os.remove('samp_'+cat_name+'.fits')
-    os.remove('resi_'+cat_name+'.fits')
-    #os.remove('moffat_'+cat_name+'.fits')
 
     return src,deg,offsetx,scalex,offsety,scaley,chi,resi,samp,snap_cube
 #src,deg,offsetx,scalex,offsety,scaley,chi,moff,resi,samp,snap_cube,sub_sym,sub_moff
