@@ -2,7 +2,7 @@ import numpy as np
 from astropy.io import fits
 import copy as cp
 
-def interpsfex(dotpsfpath, x, y):
+def interpsfex(dotpsfpath, pos):
     """Use PSFEx generated model to perform spatial PSF interpolation.
 
         Parameters
@@ -10,16 +10,13 @@ def interpsfex(dotpsfpath, x, y):
         dotpsfpath : string
             Path to .psf file (PSFEx output).
 
-        x : float
-            Position along the x-axis in the field of view.
-
-        y : float
-            Position along the y-axis in the field of view.
+        pos : np.ndaray
+            Positions where the PSF model should be evaluated.
 
         Returns
         -------
-        PSF : ndarray
-            PSF imagette.
+        PSFs : np.ndarray
+            Each row is the PSF imagette at the corresponding asked position.
     """
     # read PSF model and extract basis and polynomial degree and scale position
     PSF_model = fits.open(dotpsfpath)[1]
@@ -27,26 +24,22 @@ def interpsfex(dotpsfpath, x, y):
     try:
         deg = PSF_model.header['POLDEG1']
     except KeyError:
+        # constant PSF model
         return PSF_basis[0,:,:]
+    
+    # scale coordinates
     x_interp, x_scale = PSF_model.header['POLZERO1'], PSF_model.header['POLSCAL1']
     y_interp, y_scale = PSF_model.header['POLZERO2'], PSF_model.header['POLSCAL2']
-    x, y = (x-x_interp)/x_scale, (y-y_interp)/y_scale
+    xs, ys = (pos[:,0]-x_interp)/x_scale, (pos[:,1]-y_interp)/y_scale
     
     # compute polynomial coefficients
-    nb_monomials = int((deg+1)*(1+ float(deg)/2))
-    coeff_vect = np.empty(nb_monomials)
-    for i in xrange(0,deg+1):
-        coeff_vect[i] = x**i
-    count = deg+1
-    for i in xrange(1,deg+1):
-        for j in xrange(0,deg-i+1):
-            coeff_vect[count] = (x**j)*(y**i)
-            count +=1
+    coeffs = np.array([[x**i for i in xrange(deg+1)] for x in xs])
+    cross_coeffs = np.array([np.concatenate([[(x**j)*(y**i) for j in xrange(deg-i+1)] for i in xrange(1, deg+1)]) for x,y in zip(xs,ys)])
+    coeffs = np.hstack((coeffs,cross_coeffs))
+    
     # compute interpolated PSF
-    PSF = np.zeros((PSF_basis.shape[1], PSF_basis.shape[2]))
-    for i in range(0,nb_monomials):
-        PSF += coeff_vect[i]*PSF_basis[i,:,:]
-    return PSF
+    PSFs = np.array([np.sum([coeff * atom for coeff,atom in zip(coeffs_posi,PSF_basis)], axis=0) for coeffs_posi in coeffs])
+    return PSFs
         
         
 def create_seximage(PSF_stack, fov, filename='im.fits', size=[10000,10000], noise_level=1e-12):
