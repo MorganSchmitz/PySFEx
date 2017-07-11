@@ -123,7 +123,7 @@ def convert_coords(catname,fov_train,fov_test):
     # read coordinates from SExtractor cat
     cat = fits.open(catname)
     objs = cat[2].data
-    xs, ys = np.array([obj[-8] for obj in objs]), np.array([obj[-7] for obj in objs])
+    xs, ys = np.array([obj['X_IMAGE'] for obj in objs]), np.array([obj['Y_IMAGE'] for obj in objs])
     # determine extreme coords
     xmin, ymin, xmax, ymax = np.min(xs), np.min(ys), np.max(xs), np.max(ys)
     fovmin = np.min(fov_train,axis=0)
