@@ -89,7 +89,7 @@ def create_seximage(PSF_stack, fov, filename='im.fits', size=[10000,10000], nois
         im[size[0]-pos[1]-half_size:size[0]-pos[1]+half_size+1, 
            pos[0]-half_size:pos[0]+half_size+1] = psf
     hdu = fits.PrimaryHDU(im)
-    hdu.writeto(filename, clobber=True)
+    hdu.writeto(filename, overwrite=True)
     return im
     
     
@@ -117,6 +117,7 @@ def convert_coords(catname,fov_train,fov_test):
     cat = fits.open(catname)
     objs = cat[2].data
     xs, ys = np.array([obj['X_IMAGE'] for obj in objs]), np.array([obj['Y_IMAGE'] for obj in objs])
+    #TODO: at the very least, add a warning when there are more objects than training positions as spurious detections further out than all objects entirely mess up the conversion
     # determine extreme coords
     xmin, ymin, xmax, ymax = np.min(xs), np.min(ys), np.max(xs), np.max(ys)
     fovmin = np.min(fov_train,axis=0)
