@@ -124,9 +124,9 @@ def convert_coords(catname,fov_train,fov_test):
     fovmax = np.max(fov_train,axis=0)
     fovspan = fovmax - fovmin
     # convert to PSFEx positions
-    newx = np.array([xmin + (fov_pos - fovmin[0])/fovspan[0] * (xmax-xmin) 
+    newx = np.array([xmin + float(fov_pos - fovmin[0])/fovspan[0] * (xmax-xmin) 
                             for fov_pos in fov_test[:,0]])
-    newy = np.array([(ymax*fovmax[1] - ymin*fovmin[1] - fov_pos*(ymax-ymin))/(fovspan[1])
+    newy = np.array([float(ymax*fovmax[1] - ymin*fovmin[1] - fov_pos*(ymax-ymin))/(fovspan[1])
                             for fov_pos in fov_test[:,1]])      
     return np.vstack((newx,newy)).T  
     
